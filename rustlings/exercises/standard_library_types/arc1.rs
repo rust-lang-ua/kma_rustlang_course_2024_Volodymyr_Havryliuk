@@ -18,25 +18,27 @@
 // where the second TODO comment is. Try not to create any copies of the `numbers` Vec!
 // Execute `rustlings hint arc1` for hints :)
 
-// I AM NOT DONE
-
-#![forbid(unused_imports)] // Do not change this, (or the next) line.
+#![forbid(unused_imports)] 
 use std::sync::Arc;
 use std::thread;
 
 fn main() {
     let numbers: Vec<_> = (0..100u32).collect();
-    let shared_numbers = // TODO
+    let shared_numbers = Arc::new(numbers); // Створюємо Arc для вектора numbers
     let mut joinhandles = Vec::new();
 
     for offset in 0..8 {
-        let child_numbers = // TODO
+        let child_numbers = Arc::clone(&shared_numbers); // Клонуємо Arc для кожного потоку
         joinhandles.push(thread::spawn(move || {
-            let sum: u32 = child_numbers.iter().filter(|n| *n % 8 == offset).sum();
+            let sum: u32 = child_numbers.iter().enumerate()
+                .filter(|(i, _)| i % 8 == offset)
+                .map(|(_, &n)| n)
+                .sum();
             println!("Sum of offset {} is {}", offset, sum);
         }));
     }
-    for handle in joinhandles.into_iter() {
+
+    for handle in joinhandles {
         handle.join().unwrap();
     }
 }
